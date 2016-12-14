@@ -47,7 +47,7 @@ endif()
 SET(CXX_DISABLE_WERROR TRUE)
 INCLUDE(cmake/base.cmake)
 
-SET(PROJECT_NAME OpenSceneGraph_dae)
+SET(PROJECT_NAME osg-dae)
 SET(PROJECT_DESCRIPTION "Build dae plugin independantly of OpenSceneGraph")
 SET(PROJECT_URL "")
 
@@ -57,8 +57,121 @@ SETUP_PROJECT()
 # Maybe this can be used override existing behavior if needed?
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
-FIND_PACKAGE(COLLADA REQUIRED)
 ADD_REQUIRED_DEPENDENCY("openscenegraph = 3.2.0")
+ADD_REQUIRED_DEPENDENCY("collada14dom = 2.3.1")
+FIND_PACKAGE(COLLADA REQUIRED)
+
+FIND_LIBRARY(COLLADA_BOOST_FILESYSTEM_LIBRARY
+  NAMES libboost_filesystem boost_filesystem boost_filesystem-mt libboost_filesystem-${COLLADA_BUILDNAME}0-mt libboost_filesystem-${COLLADA_BUILDNAME}0-mt-1_54 
+  PATHS
+  ${COLLADA_DOM_ROOT}/external-libs/boost/lib/${COLLADA_BUILDNAME}
+  ${COLLADA_DOM_ROOT}/external-libs/boost/lib/mingw
+  ${ACTUAL_3DPARTY_DIR}/lib
+  )
+
+# -------------------------------------------------------------------------------
+IF(COLLADA_USE_STATIC)
+  # find extra libraries that the static linking requires
+
+  FIND_PACKAGE(LibXml2)
+    IF (LIBXML2_FOUND)
+        SET(COLLADA_LIBXML_LIBRARY "${LIBXML2_LIBRARIES}" CACHE FILEPATH "" FORCE)
+    ELSE(LIBXML2_FOUND)
+        IF(WIN32)
+            FIND_LIBRARY(COLLADA_LIBXML_LIBRARY
+                NAMES libxml2
+                PATHS
+                ${COLLADA_DOM_ROOT}/external-libs/libxml2/win32/lib
+                ${COLLADA_DOM_ROOT}/external-libs/libxml2/mingw/lib
+                ${ACTUAL_3DPARTY_DIR}/lib
+            )
+        ENDIF(WIN32)
+    ENDIF(LIBXML2_FOUND)
+    
+    FIND_PACKAGE(ZLIB)
+    IF (ZLIB_FOUND)
+        SET(COLLADA_ZLIB_LIBRARY "${ZLIB_LIBRARY}" CACHE FILEPATH "" FORCE)
+    ELSE(ZLIB_FOUND)
+        IF(WIN32)
+            FIND_LIBRARY(COLLADA_ZLIB_LIBRARY
+                NAMES zlib
+                PATHS
+                ${COLLADA_DOM_ROOT}/external-libs/libxml2/win32/lib
+                ${COLLADA_DOM_ROOT}/external-libs/libxml2/mingw/lib
+                ${ACTUAL_3DPARTY_DIR}/lib
+            )
+        ENDIF(WIN32)
+    ENDIF(ZLIB_FOUND)
+
+    FIND_LIBRARY(COLLADA_PCRECPP_LIBRARY
+        NAMES pcrecpp
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/${COLLADA_BUILDNAME}
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mac
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mingw
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+
+    FIND_LIBRARY(COLLADA_PCRECPP_LIBRARY_DEBUG
+        NAMES pcrecpp-d pcrecppd
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/${COLLADA_BUILDNAME}
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mac
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mingw
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+
+    FIND_LIBRARY(COLLADA_PCRE_LIBRARY
+        NAMES pcre
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/${COLLADA_BUILDNAME}
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mac
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mingw
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+
+    FIND_LIBRARY(COLLADA_PCRE_LIBRARY_DEBUG
+        NAMES pcre-d pcred
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/${COLLADA_BUILDNAME}
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mac
+        ${COLLADA_DOM_ROOT}/external-libs/pcre/lib/mingw
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+
+    FIND_LIBRARY(COLLADA_MINIZIP_LIBRARY
+        NAMES minizip
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/minizip/win32/lib
+        ${COLLADA_DOM_ROOT}/external-libs/minizip/mac
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+
+    FIND_LIBRARY(COLLADA_MINIZIP_LIBRARY_DEBUG
+        NAMES minizip-d minizipD
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/minizip/win32/lib
+        ${COLLADA_DOM_ROOT}/external-libs/minizip/mac
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+
+    FIND_LIBRARY(COLLADA_BOOST_SYSTEM_LIBRARY
+        NAMES libboost_system boost_system boost_system-mt libboost_system-${COLLADA_BUILDNAME}0-mt libboost_system-${COLLADA_BUILDNAME}0-mt-1_54 
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/boost/lib/${COLLADA_BUILDNAME}
+        ${COLLADA_DOM_ROOT}/external-libs/boost/lib/mingw
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+
+    FIND_LIBRARY(COLLADA_BOOST_SYSTEM_LIBRARY_DEBUG
+        NAMES libboost_system-d boost_system-d boost_system-mt-d libboost_system-${COLLADA_BUILDNAME}0-mt-gd libboost_system-${COLLADA_BUILDNAME}0-mt-gd-1_54 
+        PATHS
+        ${COLLADA_DOM_ROOT}/external-libs/boost/lib/${COLLADA_BUILDNAME}
+        ${COLLADA_DOM_ROOT}/external-libs/boost/lib/mingw
+        ${ACTUAL_3DPARTY_DIR}/lib
+    )
+ENDIF(COLLADA_USE_STATIC)
+# -----------------------------------------------------------------------------
 
 SET(OSG_PLUGINS osgPlugins-${OPENSCENEGRAPH_VERSION})
 SET(PROJECT_VERSION ${OPENSCENEGRAPH_VERSION})

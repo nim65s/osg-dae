@@ -12,5 +12,4 @@ FOREACH( mylibfolder
     )
 
     ADD_SUBDIRECTORY(${mylibfolder})
-
 ENDFOREACH()
