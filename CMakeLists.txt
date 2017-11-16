@@ -57,7 +57,7 @@ SETUP_PROJECT()
 # Maybe this can be used override existing behavior if needed?
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
-ADD_REQUIRED_DEPENDENCY("openscenegraph = 3.2.0")
+ADD_REQUIRED_DEPENDENCY("openscenegraph >= 3.2.0")
 ADD_REQUIRED_DEPENDENCY("collada14dom = 2.3.1")
 FIND_PACKAGE(COLLADA REQUIRED)
 
