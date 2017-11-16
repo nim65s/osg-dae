@@ -2,7 +2,7 @@ This package is merely a copy of the OpenSceneGraph DAE plugin.
 It can be used to compile only the DAE plugin and link it to the 
 OpenSceneGraph version on the repository.
 
-This package requires OpenSceneGraph 3.2.0 and is probably only for UNIX
+This package has been tested with OpenSceneGraph 3.2.0 and 3.2.1 and is probably only for UNIX
 systems.
 
 Please refers to the official [OpenSceneGraph](https://github.com/openscenegraph/OpenSceneGraph) project for more information.
