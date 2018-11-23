@@ -49,7 +49,7 @@ INCLUDE(cmake/base.cmake)
 
 SET(PROJECT_NAME osg-dae)
 SET(PROJECT_DESCRIPTION "Build dae plugin independantly of OpenSceneGraph")
-SET(PROJECT_URL "https://github.com/stack-of-tasks/osg-dae")
+SET(PROJECT_URL "https://github.com/gepetto/osg-dae")
 
 SETUP_PROJECT()
 
