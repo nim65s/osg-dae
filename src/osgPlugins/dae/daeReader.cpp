@@ -17,10 +17,16 @@
 #include <dom/domCOLLADA.h>
 #include <dom/domInstanceWithExtra.h>
 #include <dom/domConstants.h>
+#include <osg/ValueObject>
 #include <osg/MatrixTransform>
 #include <osg/PositionAttitudeTransform>
 
 using namespace osgDAE;
+
+#ifdef COLLADA_DOM_2_4_OR_LATER
+#include <dom/domAny.h>
+using namespace ColladaDOM141;
+#endif
 
 daeReader::Options::Options() :
     strictTransparency(false),
@@ -146,7 +152,7 @@ bool daeReader::processDocument( const std::string& fileURI)
             }
         }
 
-        // Build a map of elements that are targetted by animations
+        // Build a map of elements that are targeted by animations
         count = database->getElementCount(NULL, COLLADA_TYPE_CHANNEL, NULL);
         for (int i=0; i<count; i++)
         {
@@ -179,9 +185,9 @@ bool daeReader::processDocument( const std::string& fileURI)
         // identify every node as a joint, making it meaningless.
         std::vector<domInstance_controller*> instanceControllers;
         database->typeLookup(instanceControllers);
-        for (size_t i = 0; i < instanceControllers.size(); ++i)
+        for (size_t controller = 0; controller < instanceControllers.size(); ++controller)
         {
-            domInstance_controller* pInstanceController = instanceControllers[i];
+            domInstance_controller* pInstanceController = instanceControllers[controller];
 
             domController *pDomController = daeSafeCast<domController>(getElementFromURI(pInstanceController->getUrl()));
             if (!pDomController)
@@ -295,7 +301,8 @@ bool daeReader::convert( std::istream& fin )
     std::vector<char> buffer(length);
     fin.read(&buffer[0], length);
 
-    _document = _dae->openFromMemory(fileURI, &buffer[0]);
+    domElement* loaded_element = _dae->openFromMemory(fileURI, &buffer[0]);
+    _document = dynamic_cast<domCOLLADA*>(loaded_element);
 
     return processDocument (fileURI);
 }
@@ -304,7 +311,8 @@ bool daeReader::convert( const std::string &fileURI )
 {
     clearCaches();
 
-    _document = _dae->open(fileURI);
+    domElement* loaded_element = _dae->open(fileURI);
+    _document = dynamic_cast<domCOLLADA*>(loaded_element);
 
     return processDocument (fileURI);
 }
@@ -585,7 +593,10 @@ osg::Node* daeReader::processNode( domNode *node, bool skeleton)
     {
         std::string name = "";
         if (node->getId())
+        {
             name = node->getId();
+            resultNode->setUserValue("dae_node_id", name);
+        }
         if (node->getName())
             name = node->getName();
         resultNode->setName( name );

@@ -467,14 +467,14 @@ void daeReader::processAnimationMap(const TargetChannelPartMap& tcm, osgAnimatio
             else if (MatrixCubicBezierKeyframeContainer* cbkfCntr =
                 dynamic_cast<MatrixCubicBezierKeyframeContainer*>(channelPart->keyframes.get()))
             {
-                osgAnimation::MatrixKeyframeContainer* kfCntr = new osgAnimation::MatrixKeyframeContainer;
+                osgAnimation::MatrixKeyframeContainer* cbCntr = new osgAnimation::MatrixKeyframeContainer;
                 for (size_t i = 0; i < cbkfCntr->size(); ++i)
                 {
                     const MatrixCubicBezierKeyframe& cbkf = cbkfCntr->at(i);
-                    kfCntr->push_back(osgAnimation::MatrixKeyframe(cbkf.getTime(), cbkf.getValue().getPosition()));
+                    cbCntr->push_back(osgAnimation::MatrixKeyframe(cbkf.getTime(), cbkf.getValue().getPosition()));
                 }
                 osgAnimation::MatrixLinearChannel* channel = new osgAnimation::MatrixLinearChannel;
-                channel->getOrCreateSampler()->setKeyframeContainer(kfCntr);
+                channel->getOrCreateSampler()->setKeyframeContainer(cbCntr);
                 pOsgAnimationChannel = channel;
             }
         }
@@ -758,7 +758,7 @@ daeReader::ChannelPart* daeReader::processSampler(domChannel* pDomChannel, Sourc
     return NULL;
 }
 
-osgAnimation::Target* findChannelTarget(osg::NodeCallback* nc, const std::string& targetName, bool& rotation)
+osgAnimation::Target* findChannelTarget(osg::Callback* nc, const std::string& targetName, bool& rotation)
 {
     if (osgAnimation::UpdateMatrixTransform* umt = dynamic_cast<osgAnimation::UpdateMatrixTransform*>(nc))
     {
@@ -827,7 +827,7 @@ void daeReader::processChannel(domChannel* pDomChannel, SourceMap& sources, Targ
             domChannelOsgAnimationUpdateCallbackMap::iterator iter = _domChannelOsgAnimationUpdateCallbackMap.find(pDomChannel);
             if (iter != _domChannelOsgAnimationUpdateCallbackMap.end())
             {
-                osg::NodeCallback* nc = iter->second.get();
+                osg::Callback* nc = iter->second.get();
 
                 std::string channelName, targetName, componentName;
                 extractTargetName(pDomChannel->getTarget(), channelName, targetName, componentName);

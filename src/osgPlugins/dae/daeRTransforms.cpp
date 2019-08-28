@@ -24,11 +24,16 @@
 #include <osg/MatrixTransform>
 #include <osgSim/DOFTransform>
 
+#ifdef COLLADA_DOM_2_4_OR_LATER
+#include <dom/domAny.h>
+using namespace ColladaDOM141;
+#endif
+
 using namespace osgDAE;
 
 // Note <lookat>, <matrix>, <rotate>, <scale>, <skew> and <translate> may appear in any order
 // These transformations can be combined in any number and ordering to produce the desired
-// coordinate system for the parent <node> element. The COLLADA specificatin requires that the
+// coordinate system for the parent <node> element. The COLLADA specification requires that the
 // transformation elements are processed in order and accumulate the result as if they were
 // converted to column-order matrices and concatenated using matrix post-multiplication.
 osg::Transform* daeReader::processOsgMatrixTransform(domNode *node, bool isBone)
@@ -44,7 +49,7 @@ osg::Transform* daeReader::processOsgMatrixTransform(domNode *node, bool isBone)
         resultNode = new osg::MatrixTransform;
     }
 
-    osg::NodeCallback* pNodeCallback = resultNode->getUpdateCallback();
+    osg::Callback* pNodeCallback = resultNode->getUpdateCallback();
     std::vector<osg::ref_ptr<osgAnimation::StackedTransformElement> > transformElements;
     osg::ref_ptr<osgAnimation::StackedTransformElement> pLastStaticTransformElement;
 

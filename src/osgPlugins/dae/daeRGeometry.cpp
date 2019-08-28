@@ -224,10 +224,10 @@ osg::Node* daeReader::processMorph(domMorph* pDomMorph, domBind_material* pDomBi
                             osg::Geode* targetgeode = getOrCreateGeometry(pDomGeometry, NULL);
 
                             // Expects a single geometry inside the geode, should change this
-                            osg::Geometry* pOsgGeometry = dynamic_cast<osg::Geometry*>(targetgeode->getDrawable(0));
-                            if (pOsgGeometry)
+                            osg::Geometry* geometry = dynamic_cast<osg::Geometry*>(targetgeode->getDrawable(0));
+                            if (geometry)
                             {
-                                pOsgMorphGeometry->addMorphTarget(pOsgGeometry);
+                                pOsgMorphGeometry->addMorphTarget(geometry);
                             }
                         }
                         else
@@ -248,10 +248,10 @@ osg::Node* daeReader::processMorph(domMorph* pDomMorph, domBind_material* pDomBi
                             osg::Geode* targetgeode = getOrCreateGeometry(pDomGeometry, NULL);
 
                             // Expects a single geometry inside the geode, should change this
-                            osg::Geometry* pOsgGeometry = dynamic_cast<osg::Geometry*>(targetgeode->getDrawable(0));
-                            if (pOsgGeometry)
+                            osg::Geometry* geometry = dynamic_cast<osg::Geometry*>(targetgeode->getDrawable(0));
+                            if (geometry)
                             {
-                                pOsgMorphGeometry->addMorphTarget(pOsgGeometry);
+                                pOsgMorphGeometry->addMorphTarget(geometry);
                             }
                         }
                         else
@@ -279,7 +279,7 @@ osg::Node* daeReader::processMorph(domMorph* pDomMorph, domBind_material* pDomBi
                     pOsgMorphGeometry->setWeight(j, weights.get(j));
                 }
 
-                // See if morph weights are targetted by animations
+                // See if morph weights are targeted by animations
                 daeElementDomChannelMap::iterator iter = _daeElementDomChannelMap.find(pDomSource);
                 if (iter != _daeElementDomChannelMap.end())
                 {
@@ -595,10 +595,6 @@ void daeReader::processPolygons(osg::Geode* geode,
         // Produce triangles, interpreting polygons as fans (old way)
         osg::DrawElementsUInt* pDrawElements = new osg::DrawElementsUInt(GL_TRIANGLES);
         geometry->addPrimitiveSet(pDrawElements);
-
-        std::vector<std::vector<GLuint> > indexLists;
-        resolveMeshArrays(group->getP_array(), group->getInput_array(), pDomMesh,
-            geometry, sources, indexLists);
 
         for ( size_t i = 0; i < indexLists.size(); ++i)
         {
@@ -928,7 +924,15 @@ void daeReader::resolveMeshArrays(const domP_Array& domPArray,
 
     if (color_source)
     {
+        // first try Vec4Array
         osg::ref_ptr<osg::Array> array( createGeometryArray<osg::Vec4Array, osg::Vec4dArray, VertexIndices::COLOR>(sources[color_source], vertexIndicesIndexMap, readDoubleColors) );
+
+        // if no array matched try Vec3Array
+        if (!array)
+        {
+            array = createGeometryArray<osg::Vec3Array, osg::Vec3dArray, VertexIndices::COLOR>(sources[color_source], vertexIndicesIndexMap, readDoubleColors);
+        }
+
         if (array.valid())
         {
             geometry->setColorArray(array.get());
@@ -952,18 +956,18 @@ void daeReader::resolveMeshArrays(const domP_Array& domPArray,
             //We keep somewhere the mapping between daeElement id and created arrays
             _texCoordIdMap.insert(std::pair<std::string,size_t>(id,texcoord_set));
             // 2D Texcoords
-            osg::ref_ptr<osg::Array> array( createGeometryArray<osg::Vec2Array, osg::Vec2dArray, VertexIndices::TEXCOORD>(sources[texcoord_source], vertexIndicesIndexMap, readDoubleTexcoords, texcoord_set) );
-            if (array.valid())
+            osg::ref_ptr<osg::Array> array2d( createGeometryArray<osg::Vec2Array, osg::Vec2dArray, VertexIndices::TEXCOORD>(sources[texcoord_source], vertexIndicesIndexMap, readDoubleTexcoords, texcoord_set) );
+            if (array2d.valid())
             {
-                geometry->setTexCoordArray(texcoord_set, array.get());
+                geometry->setTexCoordArray(texcoord_set, array2d.get());
             }
             else
             {
                 // 3D Textcoords
-                osg::ref_ptr<osg::Array> array( createGeometryArray<osg::Vec3Array, osg::Vec3dArray, VertexIndices::TEXCOORD>(sources[texcoord_source], vertexIndicesIndexMap, readDoubleTexcoords, texcoord_set) );
-                if (array.valid())
+                osg::ref_ptr<osg::Array> array3d( createGeometryArray<osg::Vec3Array, osg::Vec3dArray, VertexIndices::TEXCOORD>(sources[texcoord_source], vertexIndicesIndexMap, readDoubleTexcoords, texcoord_set) );
+                if (array3d.valid())
                 {
-                    geometry->setTexCoordArray(texcoord_set, array.get());
+                    geometry->setTexCoordArray(texcoord_set, array3d.get());
                 }
             }
         }

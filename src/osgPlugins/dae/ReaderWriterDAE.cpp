@@ -32,6 +32,12 @@
 
 #define SERIALIZER() OpenThreads::ScopedLock<OpenThreads::ReentrantMutex> lock(_serializerMutex)
 
+#if  __cplusplus > 199711L
+    #define smart_ptr std::unique_ptr
+#else
+    #define smart_ptr std::auto_ptr
+#endif
+
 osgDB::ReaderWriter::ReadResult
 ReaderWriterDAE::readNode(std::istream& fin,
         const osgDB::ReaderWriter::Options* options) const
@@ -65,10 +71,14 @@ ReaderWriterDAE::readNode(std::istream& fin,
     if (NULL == pDAE)
     {
         bOwnDAE = true;
+#ifdef COLLADA_DOM_2_4_OR_LATER
+        pDAE = new DAE(NULL,NULL,_specversion);
+#else
         pDAE = new DAE;
+#endif
     }
 
-    std::auto_ptr<DAE> scopedDae(bOwnDAE ? pDAE : NULL);        // Deallocates locally created structure at scope exit
+    smart_ptr<DAE> scopedDae(bOwnDAE ? pDAE : NULL);        // Deallocates locally created structure at scope exit
 
     osgDAE::daeReader daeReader(pDAE, &pluginOptions);
 
@@ -133,15 +143,23 @@ ReaderWriterDAE::readNode(const std::string& fname,
 
     std::string fileName( osgDB::findDataFile( fname, options ) );
     if( fileName.empty() ) return ReadResult::FILE_NOT_FOUND;
+    
+    pluginOptions.options = options ? osg::clone(options, osg::CopyOp::SHALLOW_COPY) : new Options;
+    pluginOptions.options->getDatabasePathList().push_front(osgDB::getFilePath(fileName));
 
     OSG_INFO << "ReaderWriterDAE( \"" << fileName << "\" )" << std::endl;
 
     if (NULL == pDAE)
     {
         bOwnDAE = true;
+#ifdef COLLADA_DOM_2_4_OR_LATER
+        pDAE = new DAE(NULL,NULL,_specversion);
+#else
         pDAE = new DAE;
+#endif
     }
-    std::auto_ptr<DAE> scopedDae(bOwnDAE ? pDAE : NULL);        // Deallocates locally created structure at scope exit
+
+    smart_ptr<DAE> scopedDae(bOwnDAE ? pDAE : NULL);        // Deallocates locally created structure at scope exit
 
     osgDAE::daeReader daeReader(pDAE, &pluginOptions);
 
@@ -221,6 +239,7 @@ ReaderWriterDAE::writeNode( const osg::Node& node,
             else if (opt == "daeLinkOriginalTexturesNoForce") { pluginOptions.linkOrignialTextures = true; pluginOptions.forceTexture = false; }
             else if (opt == "daeLinkOriginalTexturesForce")   { pluginOptions.linkOrignialTextures = true; pluginOptions.forceTexture = true; }
             else if (opt == "daeNamesUseCodepage") pluginOptions.namesUseCodepage = true;
+            else if (opt == "daeRenameIds") pluginOptions.renameIds = true;
             else if (!opt.empty())
             {
                 OSG_NOTICE << std::endl << "COLLADA dae plugin: unrecognized option \"" << opt <<  std::endl;
@@ -231,9 +250,13 @@ ReaderWriterDAE::writeNode( const osg::Node& node,
     if (NULL == pDAE)
     {
         bOwnDAE = true;
+#ifdef COLLADA_DOM_2_4_OR_LATER
+        pDAE = new DAE(NULL,NULL,_specversion);
+#else
         pDAE = new DAE;
+#endif
     }
-    std::auto_ptr<DAE> scopedDae(bOwnDAE ? pDAE : NULL);        // Deallocates locally created structure at scope exit
+    smart_ptr<DAE> scopedDae(bOwnDAE ? pDAE : NULL);        // Deallocates locally created structure at scope exit
 
     // Convert file name to URI
     std::string fileURI = ConvertFilePathToColladaCompatibleURI(fname);
@@ -267,7 +290,7 @@ ReaderWriterDAE::writeNode( const osg::Node& node,
 
 static void replace(std::string & str, const char from, const std::string & to)
 {
-    // Replace for all occurences
+    // Replace for all occurrences
     for(std::string::size_type pos=str.find(from); pos!=std::string::npos; pos=str.find(from))
     {
         str.replace(pos, 1, to);
@@ -276,7 +299,7 @@ static void replace(std::string & str, const char from, const std::string & to)
 
 static void replace(std::string & str, const std::string & from, const std::string & to)
 {
-    // Replace for all occurences
+    // Replace for all occurrences
     std::size_t lenFrom = from.size();
     std::size_t lenTo = to.size();
     for(std::string::size_type pos=str.find(from); pos!=std::string::npos; pos = str.find(from, pos+lenTo))
