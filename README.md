@@ -1,5 +1,10 @@
+# OSG-DAE
+
+[![Pipeline status](https://gepgitlab.laas.fr/gepetto/osg-dae/badges/master/pipeline.svg)](https://gepgitlab.laas.fr/gepetto/osg-dae/commits/master)
+[![Coverage report](https://gepgitlab.laas.fr/gepetto/osg-dae/badges/master/coverage.svg?job=doc-coverage)](http://projects.laas.fr/gepetto/doc/gepetto/osg-dae/master/coverage/)
+
 This package is merely a copy of the OpenSceneGraph DAE plugin.
-It can be used to compile only the DAE plugin and link it to the 
+It can be used to compile only the DAE plugin and link it to the
 OpenSceneGraph version on the repository.
 
 This package has been tested with OpenSceneGraph 3.2.0 and 3.2.1 and is probably only for UNIX
